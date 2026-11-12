@@ -1,0 +1,95 @@
+{
+  "summary": {
+    "n_requests": 121,
+    "first": "2026-11-12T17:48:52+00:00",
+    "last": "2026-11-12T20:37:20+00:00",
+    "error_rate": 0.0083,
+    "refusal_rate": 0.3802,
+    "n_instrumented": 28,
+    "latency_service_p50_ms": 1133.3,
+    "latency_service_p95_ms": 3656.4,
+    "latency_total_p95_ms": 12097.4,
+    "rate_limit_share": 0.5357,
+    "translation_fallback_rate": 0.0,
+    "top_score_mean": 0.5486,
+    "question_length_mean": 39.8595,
+    "tokens_total": 106018,
+    "tokens_per_request_mean": 876.2,
+    "cost_total_usd": 0.014864,
+    "cost_per_1000_requests_usd": 0.1228
+  },
+  "drift": {
+    "available": true,
+    "window": 40,
+    "top_score_ref": 0.5901,
+    "top_score_current": 0.523,
+    "top_score_drop": 0.0671,
+    "question_length_ref": 40.05,
+    "question_length_current": 40.475,
+    "question_length_change": 0.0106
+  },
+  "alerts": [
+    {
+      "name": "Taux d'erreur",
+      "status": "ok",
+      "value": 0.0083,
+      "threshold": 0.05
+    },
+    {
+      "name": "Latence de service P95 (ms)",
+      "status": "ok",
+      "value": 3656.4,
+      "threshold": 8000
+    },
+    {
+      "name": "Requêtes ralenties par la limite de débit",
+      "status": "alert",
+      "value": 0.5357,
+      "threshold": 0.2
+    },
+    {
+      "name": "Échecs de traduction",
+      "status": "ok",
+      "value": 0.0,
+      "threshold": 0.05
+    },
+    {
+      "name": "Baisse du score de retrieval (dérive)",
+      "status": "ok",
+      "value": 0.0671,
+      "threshold": 0.1
+    },
+    {
+      "name": "Variation de la longueur des questions (dérive)",
+      "status": "ok",
+      "value": 0.0106,
+      "threshold": 0.5
+    }
+  ],
+  "by_hour": [
+    {
+      "hour": "2026-11-12 17h",
+      "requests": 3,
+      "errors": 1,
+      "refusals": 2,
+      "latency_service_p95_ms": null,
+      "tokens": 810
+    },
+    {
+      "hour": "2026-11-12 18h",
+      "requests": 6,
+      "errors": 0,
+      "refusals": 4,
+      "latency_service_p95_ms": null,
+      "tokens": 4717
+    },
+    {
+      "hour": "2026-11-12 20h",
+      "requests": 112,
+      "errors": 0,
+      "refusals": 40,
+      "latency_service_p95_ms": 3656.4,
+      "tokens": 100491
+    }
+  ]
+}

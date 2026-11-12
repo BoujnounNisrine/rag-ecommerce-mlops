@@ -185,6 +185,18 @@ committer le nouveau `reports/retrieval_metrics.json`, sinon la CI échoue.
 
 ## Monitoring
 
+```bash
+python -m src.monitoring.dashboard     # puis ouvrir reports/monitoring.html
+```
+
+Tableau de bord HTML autonome (graphiques SVG, mode sombre, aucune ressource externe) :
+requêtes, taux d'erreur, latence de service P50/P95 et latence totale, taux de refus,
+tokens et coût estimé, latence par requête (l'écart service/totale montre l'attente due
+à la limite de débit), distribution du meilleur score de retrieval avec le seuil de
+refus, dérive des entrées (fenêtre récente vs précédente) et activité par heure.
+Six alertes, seuils dans `params.yaml` (section `monitoring`), alignés sur les quality
+gates. Résumé machine dans `reports/monitoring.json`.
+
 Chaque requête ajoute une ligne à `logs/requests.jsonl` : latence (retrieval, génération,
 total), tokens consommés, refus, erreur, meilleur score et sources. Le texte de la question
 n'est pas stocké, seulement une empreinte et sa longueur.
@@ -200,5 +212,5 @@ n'est pas stocké, seulement une empreinte et sa longueur.
 - [x] Journal de monitoring
 - [x] Évaluation de la génération (exactitude, fidélité, citations, latence, coût)
 - [x] Quality gates (CI + DVC)
-- [ ] Tableau de bord de monitoring
+- [x] Tableau de bord de monitoring (alertes, dérive, coût)
 - [ ] Rapport de risques et gouvernance

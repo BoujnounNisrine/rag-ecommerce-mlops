@@ -84,3 +84,16 @@ eval:
   # Questions tirées de la colonne `instruction`, stratifiées par intent.
   questions_per_intent: 4
   ks: [1, 3, 5]
+
+monitoring:
+  # Tableau de bord : python -m src.monitoring.dashboard (lit logs/requests.jsonl).
+  # Les N requêtes les plus récentes sont comparées aux N précédentes pour
+  # détecter une dérive des entrées (scores de retrieval, longueur des questions).
+  window: 40
+  alerts:
+    error_rate_max: 0.05            # même seuil que la quality gate error_rate
+    latency_service_p95_max_ms: 8000  # même exigence métier que la quality gate
+    rate_limit_share_max: 0.20      # part des requêtes ralenties par la limite de débit
+    translation_fallback_max: 0.05  # traductions échouées (recherche en langue d'origine)
+    top_score_drop_max: 0.10        # baisse du score moyen de retrieval (dérive)
+    question_length_change_max: 0.50  # variation relative de la longueur moyenne
