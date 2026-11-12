@@ -29,6 +29,7 @@ class TranslationResult:
     prompt_tokens: int = 0
     completion_tokens: int = 0
     error: str | None = None
+    retry_wait_ms: float = 0.0
 
 
 class QueryTranslator:
@@ -49,12 +50,14 @@ class QueryTranslator:
         except Exception as exc:
             return TranslationResult(question, True, _ms(start), error=type(exc).__name__)
 
+        wait = getattr(result, "retry_wait_ms", 0.0)
         text = result.text.strip().strip('"').strip()
         too_long = len(text) > self.max_length_ratio * max(len(question), 20)
         if not text or too_long:
             return TranslationResult(question, True, _ms(start), result.prompt_tokens,
-                                     result.completion_tokens, "invalid_translation")
-        return TranslationResult(text, False, _ms(start), result.prompt_tokens, result.completion_tokens)
+                                     result.completion_tokens, "invalid_translation", wait)
+        return TranslationResult(text, False, _ms(start), result.prompt_tokens,
+                                 result.completion_tokens, None, wait)
 
 
 def _ms(start: float) -> float:

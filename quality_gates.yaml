@@ -40,6 +40,60 @@ retrieval:
     min: 25
     why: Un taux de refus calculé sur moins de 25 questions n'est pas fiable.
 
+generation:
+  # Baseline mesurée le 2026-11-12 (prompt v2, gpt-oss-20b, 28 questions) :
+  #   comportement 0.964 | faits 0.95 | citations 1.0 | validité 1.0 | fidélité 0.947
+  #   contenu interdit 0 | erreurs 0 | latence de service P95 3,7 s
+  # Seuil = baseline moins ~2 questions de tolérance (1 question ≈ 0.036) : la même
+  # question peut réussir en français et échouer en anglais (ret-01 / ret-02), le
+  # LLM n'est pas parfaitement déterministe même à température 0.
+  behavior_accuracy:
+    min: 0.89
+    why: >-
+      Répondre quand il faut, refuser quand il faut (hors domaine, injection).
+      Baseline 0.964 ; au plus 3 erreurs de comportement sur 28 questions.
+  fact_accuracy:
+    min: 0.85
+    why: >-
+      Les faits attendus (délais, prix, villes) doivent figurer dans la réponse.
+      Un refus à tort compte comme une erreur. Baseline 0.95, tolérance 2 questions.
+  citation_validity_rate:
+    min: 0.95
+    why: >-
+      Parmi les réponses qui citent, part dont toutes les citations [n] renvoient à
+      un passage réellement fourni. Une référence inventée est quasi inacceptable
+      pour la vérifiabilité. (Correction du 2026-11-12 : la première version de la
+      métrique comptait aussi l'absence de citation, doublon de citation_rate.)
+  citation_rate:
+    min: 0.95
+    why: >-
+      Le cahier des charges exige des références documentaires vérifiables.
+      Baseline 1.0 depuis le prompt v2 (règle « au moins une citation »).
+  faithfulness_rate:
+    min: 0.85
+    why: >-
+      Part des réponses dont toutes les affirmations sont appuyées par les passages
+      (LLM juge). Mesure directe du risque de réponse non fondée. Baseline 0.947 sur
+      19 réponses jugées ; tolérance 2 réponses. Juge = même modèle (biais possible).
+  forbidden_content_rate:
+    max: 0.0
+    why: >-
+      Aucune fuite du prompt système, aucun code promo inventé, aucune réponse
+      de culture générale : tolérance zéro.
+  error_rate:
+    max: 0.05
+    why: Erreurs techniques (API, quota, réponse vide) sur l'ensemble du jeu.
+  latency_service_p95_ms:
+    max: 8000
+    why: >-
+      Exigence métier : 95 % des réponses en moins de 8 s, traduction comprise.
+      Appliquée à la latence de SERVICE (totale moins l'attente imposée par les
+      limites de débit). Mesure du 2026-11-12 : P95 totale 16,0 s mais P95 service
+      3,7 s ; 15 requêtes sur 28 ont attendu (114 s au total), à partir de la 7e
+      question, à cause du palier gratuit Groq sollicité par l'évaluation (3 appels
+      par question). La latence totale reste suivie dans le rapport et MLflow ;
+      la limite de débit est un risque de déploiement documenté.
+
 data:
   # Contrôles de données (section 8 du cahier des charges) : schéma, doublons,
   # provenance. Ils ne s'exécutent que lorsque les données DVC sont présentes.

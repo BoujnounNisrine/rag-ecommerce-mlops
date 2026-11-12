@@ -139,6 +139,29 @@ mlflow ui                         # puis http://127.0.0.1:5000
 - **Expériences** : `small_chunks` (120/20) vs `large_chunks` (300/60). Chaque run MLflow
   enregistre paramètres, métriques, empreintes DVC des données et détail par question.
 
+## Évaluation de la génération
+
+`data/eval/generation_questions.jsonl` contient 28 questions annotées à la main (FR/EN) :
+faits simples et multiples, contradiction 30 jours / 14 jours, information présente
+seulement dans un document archivé, questions Bitext, questions proches du domaine à
+refuser (produit non vendu, autre boutique), injections, question ambiguë.
+
+```bash
+python -m src.evaluation.generation              # ~85 appels Groq, 1 à 3 min
+python -m src.evaluation.generation --no-judge --limit 5   # essai rapide
+```
+
+Contrôles automatiques par question : comportement (répondre / refuser / préciser),
+faits attendus, contenu interdit, présence et validité des citations `[n]`, source
+attendue. Un **LLM juge** vérifie que chaque affirmation est appuyée par les passages
+(fidélité). Agrégats : taux par contrôle et par catégorie, latence moyenne / P50 / P95,
+tokens et coût estimé par requête. Chaque run est enregistré dans l'expérience MLflow
+`rag-generation` ; le détail est dans `reports/generation_details.jsonl`.
+
+Limites : le juge est le même modèle que l'assistant (biais d'auto-évaluation possible) ;
+les contrôles de faits reposent sur des mots-clés ; 28 questions donnent une estimation
+grossière (1 question ≈ 3,6 points).
+
 ## Quality gates
 
 Une version est **rejetée** si un seul critère de `quality_gates.yaml` échoue. Chaque seuil
@@ -175,7 +198,7 @@ n'est pas stocké, seulement une empreinte et sa longueur.
 - [x] Pipeline RAG (retrieval + génération Groq + références + refus)
 - [x] Évaluation du retrieval + MLflow
 - [x] Journal de monitoring
-- [ ] Évaluation de la génération (fidélité, exactitude)
+- [x] Évaluation de la génération (exactitude, fidélité, citations, latence, coût)
 - [x] Quality gates (CI + DVC)
 - [ ] Tableau de bord de monitoring
 - [ ] Rapport de risques et gouvernance

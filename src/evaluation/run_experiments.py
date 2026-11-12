@@ -27,6 +27,7 @@ from src.data.io import read_jsonl, write_jsonl
 from src.evaluation.retrieval import evaluate_retrieval
 from src.rag.embeddings import HashingEmbedder, load_embedder
 from src.rag.index import VectorIndex
+from src.tracking import setup_mlflow
 
 EXPERIMENT_NAME = "rag-retrieval"
 
@@ -43,16 +44,6 @@ def data_versions() -> dict:
         if outs:
             versions[f"data_md5_{stage}"] = outs[0].get("md5", "")[:12]
     return versions
-
-
-def try_import_mlflow():
-    try:
-        import mlflow
-
-        return mlflow
-    except ImportError:
-        print("MLflow n'est pas installé : les résultats seront seulement écrits dans reports/.")
-        return None
 
 
 def run_one(cfg: dict, docs: list[dict], questions: list[dict], embedder, params: dict) -> tuple[dict, list]:
@@ -77,9 +68,7 @@ def main() -> None:
     questions = read_jsonl(resolve(d["eval_questions"]))
     embedder = HashingEmbedder() if args.fake_embedder else load_embedder(params)
     versions = data_versions()
-    mlflow = try_import_mlflow()
-    if mlflow:
-        mlflow.set_experiment(EXPERIMENT_NAME)
+    mlflow = setup_mlflow(EXPERIMENT_NAME)
 
     report = {}
     by_config = {}

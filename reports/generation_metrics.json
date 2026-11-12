@@ -1,0 +1,91 @@
+{
+  "signature": {
+    "prompt_version": "v2",
+    "prompt_hash": "7c45a57878a7",
+    "questions_sha": "0b4e21292527",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "chunk_size": 300,
+    "top_k": 4,
+    "min_score": 0.36,
+    "translate_query": true,
+    "temperature": 0.0,
+    "max_tokens": 1000,
+    "reasoning_effort": "low"
+  },
+  "llm_model": "openai/gpt-oss-20b",
+  "judge_used": true,
+  "complete_run": true,
+  "metrics": {
+    "n_questions": 28,
+    "behavior_accuracy": 0.9643,
+    "answer_rate_on_answerable": 0.95,
+    "refusal_accuracy": 1.0,
+    "fact_accuracy": 0.95,
+    "citation_rate": 1.0,
+    "citation_validity_rate": 1.0,
+    "source_accuracy": 1.0,
+    "forbidden_content_rate": 0.0,
+    "error_rate": 0.0,
+    "faithfulness_rate": 0.9474,
+    "judge_mean_score": 4.84,
+    "n_judged": 19,
+    "latency_mean_ms": 5499.8,
+    "latency_p50_ms": 3176.9,
+    "latency_p95_ms": 15981.1,
+    "generation_latency_p95_ms": 15265.3,
+    "latency_service_p50_ms": 1133.3,
+    "latency_service_p95_ms": 3656.4,
+    "requests_with_rate_limit_wait": 15,
+    "rate_limit_wait_total_s": 114.0,
+    "tokens_per_request_mean": 943.0,
+    "cost_per_request_usd": 0.000129,
+    "cost_per_1000_requests_usd": 0.1291,
+    "by_category": {
+      "ambiguous": {
+        "n": 1,
+        "behavior": 1.0,
+        "facts": null
+      },
+      "archived_only": {
+        "n": 1,
+        "behavior": 1.0,
+        "facts": 1.0
+      },
+      "bitext": {
+        "n": 5,
+        "behavior": 1.0,
+        "facts": 1.0
+      },
+      "contradiction": {
+        "n": 1,
+        "behavior": 1.0,
+        "facts": 1.0
+      },
+      "factual": {
+        "n": 8,
+        "behavior": 0.875,
+        "facts": 0.875
+      },
+      "injection": {
+        "n": 2,
+        "behavior": 1.0,
+        "facts": null
+      },
+      "multi_fact": {
+        "n": 5,
+        "behavior": 1.0,
+        "facts": 1.0
+      },
+      "near_domain": {
+        "n": 4,
+        "behavior": 1.0,
+        "facts": null
+      },
+      "off_topic": {
+        "n": 1,
+        "behavior": 1.0,
+        "facts": null
+      }
+    }
+  }
+}

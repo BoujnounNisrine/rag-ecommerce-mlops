@@ -28,6 +28,14 @@ class RAGResponse:
     translation_fallback: bool = False
 
 
+def _finish_latency(latency: dict, t0: float, retry_wait_ms: float) -> None:
+    """total = temps réel ; service = total moins l'attente due aux limites de débit."""
+    total = (time.perf_counter() - t0) * 1000
+    latency["retry_wait"] = round(retry_wait_ms, 1)
+    latency["service"] = round(max(total - retry_wait_ms, 0.0), 1)
+    latency["total"] = round(total, 1)
+
+
 def _source_view(result) -> dict:
     c = result.chunk
     return {
@@ -74,11 +82,13 @@ class RAGPipeline:
         search_query, latency = question, {}
         tr_prompt = tr_completion = 0
         fallback = False
+        retry_wait = 0.0  # attente due aux limites de débit (pas du temps de calcul)
         if self.translator is not None:
             tr = self.translator.translate(question)
             search_query, fallback = tr.text, tr.used_fallback
             tr_prompt, tr_completion = tr.prompt_tokens, tr.completion_tokens
             latency["translation"] = tr.latency_ms
+            retry_wait += getattr(tr, "retry_wait_ms", 0.0)
 
         # 2. Retrieval
         t1 = time.perf_counter()
@@ -89,7 +99,7 @@ class RAGPipeline:
 
         # 3. Refus avant le LLM si aucun passage n'est assez proche
         if top_score is None or top_score < self.min_score:
-            latency["total"] = round((time.perf_counter() - t0) * 1000, 1)
+            _finish_latency(latency, t0, retry_wait)
             response = RAGResponse(
                 request_id, NO_ANSWER, refused=True, sources=sources, top_score=top_score,
                 latency_ms=latency, prompt_tokens=tr_prompt, completion_tokens=tr_completion,
@@ -108,7 +118,9 @@ class RAGPipeline:
         except Exception as exc:  # erreur réseau, quota, clé invalide…
             generation, answer, error = None, NO_ANSWER, type(exc).__name__
         latency["generation"] = round((time.perf_counter() - t2) * 1000, 1)
-        latency["total"] = round((time.perf_counter() - t0) * 1000, 1)
+        if generation is not None:
+            retry_wait += getattr(generation, "retry_wait_ms", 0.0)
+        _finish_latency(latency, t0, retry_wait)
 
         response = RAGResponse(
             request_id=request_id,

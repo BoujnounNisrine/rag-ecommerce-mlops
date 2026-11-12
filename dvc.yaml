@@ -73,6 +73,29 @@ stages:
       - reports/retrieval_metrics.json:
           cache: false
 
+  evaluate_generation:
+    # Appelle réellement Groq (~85 appels, 1 à 3 min). Relancé seulement si le prompt,
+    # le code RAG, l'index, les questions ou les paramètres de génération changent.
+    cmd: python -m src.evaluation.generation
+    deps:
+      - src/evaluation/generation.py
+      - src/rag/prompt.py
+      - src/rag/pipeline.py
+      - src/rag/translation.py
+      - src/rag/generator.py
+      - data/eval/generation_questions.jsonl
+      - artifacts/index
+    params:
+      - retrieval
+      - generation
+      - generation_eval
+    metrics:
+      - reports/generation_metrics.json:
+          cache: false
+    outs:
+      - reports/generation_details.jsonl:
+          cache: false
+
   quality_gates:
     # Échoue (et arrête dvc repro) si un critère de quality_gates.yaml n'est pas respecté.
     cmd: python -m src.quality.gates
@@ -80,6 +103,7 @@ stages:
       - src/quality/gates.py
       - quality_gates.yaml
       - reports/retrieval_metrics.json
+      - reports/generation_metrics.json
       - data/processed/documents.jsonl
       - data/processed/chunks.jsonl
       - data/eval/questions.jsonl

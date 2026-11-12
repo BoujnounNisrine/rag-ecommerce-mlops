@@ -14,6 +14,9 @@ data:
   index_dir: artifacts/index
   retrieval_report: reports/retrieval_metrics.json
   request_log: logs/requests.jsonl
+  generation_questions: data/eval/generation_questions.jsonl
+  generation_report: reports/generation_metrics.json
+  generation_details: reports/generation_details.jsonl
 
 prepare:
   # Nombre de réponses distinctes conservées par intent pour construire le corpus.
@@ -64,6 +67,18 @@ generation:
   # "low" pour les modèles qui raisonnent (gpt-oss) : plus rapide, moins de tokens.
   # Mettre null si GROQ_MODEL désigne un modèle qui ne raisonne pas.
   reasoning_effort: low
+  # Prix en USD par million de tokens, pour estimer le coût par requête.
+  # Valeurs à vérifier sur la page de tarifs Groq pour le modèle de GROQ_MODEL.
+  price_per_million_input: 0.10
+  price_per_million_output: 0.50
+
+generation_eval:
+  # LLM juge : vérifie que chaque affirmation de la réponse est appuyée par les
+  # passages fournis (fidélité). Même modèle que l'assistant : biais possible
+  # d'auto-évaluation, à mentionner dans le rapport.
+  use_judge: true
+  # Pause entre deux questions pour rester sous la limite de débit de Groq.
+  sleep_seconds: 1.0
 
 eval:
   # Questions tirées de la colonne `instruction`, stratifiées par intent.

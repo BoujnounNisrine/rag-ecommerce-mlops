@@ -4,6 +4,8 @@ Trois familles de contrôles :
   1. Fraîcheur  — le rapport d'évaluation correspond-il aux paramètres actuels,
                   et a-t-il été produit avec le vrai modèle d'embeddings ?
   2. Retrieval  — métriques de la configuration active vs seuils (quality_gates.yaml).
+  2b. Génération — rapport à jour (prompt, paramètres, questions), run complet avec
+                  juge, puis seuils de qualité des réponses, latence P95, erreurs.
   3. Données    — schéma, doublons, provenance, placeholders, cohérence du jeu
                   d'évaluation (seulement si les fichiers DVC sont présents).
 
@@ -74,19 +76,50 @@ def check_freshness(report: dict, params: dict) -> list[GateResult]:
 
 # 2. Retrieval ---------------------------------------------------------------
 
-def check_retrieval(metrics: dict, gates: dict) -> list[GateResult]:
+def check_thresholds(metrics: dict, gates: dict, family: str = "retrieval") -> list[GateResult]:
     results = []
     for name, rule in gates.items():
         value = metrics.get(name)
         if value is None:
-            results.append(GateResult("retrieval", name, False, None, "", "Métrique absente du rapport"))
+            results.append(GateResult(family, name, False, None, "", "Métrique absente du rapport"))
             continue
         if "min" in rule:
             passed, threshold = value >= rule["min"], f">= {rule['min']}"
         else:
             passed, threshold = value <= rule["max"], f"<= {rule['max']}"
-        results.append(GateResult("retrieval", name, passed, value, threshold, rule.get("why", "").strip()))
+        results.append(GateResult(family, name, passed, value, threshold, rule.get("why", "").strip()))
     return results
+
+
+def check_retrieval(metrics: dict, gates: dict) -> list[GateResult]:
+    return check_thresholds(metrics, gates, "retrieval")
+
+
+# 2 bis. Génération ------------------------------------------------------------
+
+def check_generation(report: dict | None, params: dict, gates: dict) -> list[GateResult]:
+    from src.evaluation.generation import generation_signature  # import local (prompt, numpy)
+
+    if report is None:
+        return [GateResult("generation", "report_exists", False,
+                           detail="generation_metrics.json introuvable. Lancez : dvc repro")]
+    expected = generation_signature(params)
+    got = report.get("signature", {})
+    diffs = {k: (got.get(k), v) for k, v in expected.items() if got.get(k) != v}
+    results = [
+        GateResult("generation", "report_matches_params", not diffs,
+                   detail="" if not diffs else
+                   "Rapport de génération obsolète (rapport -> actuel) : "
+                   + ", ".join(f"{k}: {a} -> {b}" for k, (a, b) in diffs.items())
+                   + ". Lancez : dvc repro"),
+        GateResult("generation", "complete_run", report.get("complete_run") is True,
+                   report.get("complete_run"), "== True",
+                   "Le rapport provient d'un essai partiel (--limit)"),
+        GateResult("generation", "judge_used", report.get("judge_used") is True,
+                   report.get("judge_used"), "== True",
+                   "La fidélité n'a pas été évaluée (--no-judge)"),
+    ]
+    return results + check_thresholds(report.get("metrics", {}), gates, "generation")
 
 
 # 3. Données ----------------------------------------------------------------
@@ -153,6 +186,11 @@ def run(report_only: bool = False) -> list[GateResult]:
     results = check_freshness(report, params)
     results += check_retrieval(report.get("active", {}).get("metrics", {}), gates["retrieval"])
 
+    if "generation" in gates:
+        gen_path = resolve(params["data"]["generation_report"])
+        gen_report = json.loads(gen_path.read_text(encoding="utf-8")) if gen_path.exists() else None
+        results += check_generation(gen_report, params, gates["generation"])
+
     if not report_only:
         d = params["data"]
         paths = [resolve(d["documents"]), resolve(d["chunks"]), resolve(d["eval_questions"])]
@@ -169,7 +207,7 @@ def print_results(results: list[GateResult]) -> None:
     for res in results:
         icon = "PASS" if res.passed else "FAIL"
         value = "" if res.value is None else f" = {res.value}"
-        print(f"  [{icon}] {res.family:9s} {res.name:30s}{value} {res.threshold}")
+        print(f"  [{icon}] {res.family:10s} {res.name:30s}{value} {res.threshold}")
         if not res.passed and res.detail:
             print(f"         -> {res.detail}")
 

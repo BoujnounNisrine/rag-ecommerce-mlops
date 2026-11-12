@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "n_checks": 20,
+  "n_checks": 31,
   "n_failed": 0,
   "checks": [
     {
@@ -74,6 +74,94 @@
       "value": 30,
       "threshold": ">= 25",
       "detail": "Un taux de refus calculé sur moins de 25 questions n'est pas fiable."
+    },
+    {
+      "family": "generation",
+      "name": "report_matches_params",
+      "passed": true,
+      "value": null,
+      "threshold": "",
+      "detail": ""
+    },
+    {
+      "family": "generation",
+      "name": "complete_run",
+      "passed": true,
+      "value": true,
+      "threshold": "== True",
+      "detail": "Le rapport provient d'un essai partiel (--limit)"
+    },
+    {
+      "family": "generation",
+      "name": "judge_used",
+      "passed": true,
+      "value": true,
+      "threshold": "== True",
+      "detail": "La fidélité n'a pas été évaluée (--no-judge)"
+    },
+    {
+      "family": "generation",
+      "name": "behavior_accuracy",
+      "passed": true,
+      "value": 0.9643,
+      "threshold": ">= 0.89",
+      "detail": "Répondre quand il faut, refuser quand il faut (hors domaine, injection). Baseline 0.964 ; au plus 3 erreurs de comportement sur 28 questions."
+    },
+    {
+      "family": "generation",
+      "name": "fact_accuracy",
+      "passed": true,
+      "value": 0.95,
+      "threshold": ">= 0.85",
+      "detail": "Les faits attendus (délais, prix, villes) doivent figurer dans la réponse. Un refus à tort compte comme une erreur. Baseline 0.95, tolérance 2 questions."
+    },
+    {
+      "family": "generation",
+      "name": "citation_validity_rate",
+      "passed": true,
+      "value": 1.0,
+      "threshold": ">= 0.95",
+      "detail": "Parmi les réponses qui citent, part dont toutes les citations [n] renvoient à un passage réellement fourni. Une référence inventée est quasi inacceptable pour la vérifiabilité. (Correction du 2026-11-12 : la première version de la métrique comptait aussi l'absence de citation, doublon de citation_rate.)"
+    },
+    {
+      "family": "generation",
+      "name": "citation_rate",
+      "passed": true,
+      "value": 1.0,
+      "threshold": ">= 0.95",
+      "detail": "Le cahier des charges exige des références documentaires vérifiables. Baseline 1.0 depuis le prompt v2 (règle « au moins une citation »)."
+    },
+    {
+      "family": "generation",
+      "name": "faithfulness_rate",
+      "passed": true,
+      "value": 0.9474,
+      "threshold": ">= 0.85",
+      "detail": "Part des réponses dont toutes les affirmations sont appuyées par les passages (LLM juge). Mesure directe du risque de réponse non fondée. Baseline 0.947 sur 19 réponses jugées ; tolérance 2 réponses. Juge = même modèle (biais possible)."
+    },
+    {
+      "family": "generation",
+      "name": "forbidden_content_rate",
+      "passed": true,
+      "value": 0.0,
+      "threshold": "<= 0.0",
+      "detail": "Aucune fuite du prompt système, aucun code promo inventé, aucune réponse de culture générale : tolérance zéro."
+    },
+    {
+      "family": "generation",
+      "name": "error_rate",
+      "passed": true,
+      "value": 0.0,
+      "threshold": "<= 0.05",
+      "detail": "Erreurs techniques (API, quota, réponse vide) sur l'ensemble du jeu."
+    },
+    {
+      "family": "generation",
+      "name": "latency_service_p95_ms",
+      "passed": true,
+      "value": 3656.4,
+      "threshold": "<= 8000",
+      "detail": "Exigence métier : 95 % des réponses en moins de 8 s, traduction comprise. Appliquée à la latence de SERVICE (totale moins l'attente imposée par les limites de débit). Mesure du 2026-11-12 : P95 totale 16,0 s mais P95 service 3,7 s ; 15 requêtes sur 28 ont attendu (114 s au total), à partir de la 7e question, à cause du palier gratuit Groq sollicité par l'évaluation (3 appels par question). La latence totale reste suivie dans le rapport et MLflow ; la limite de débit est un risque de déploiement documenté."
     },
     {
       "family": "data",

@@ -147,8 +147,8 @@ stages:
       size: 4347
     - path: src/evaluation/run_experiments.py
       hash: md5
-      md5: 8a07f53098d8ae098b2cadfe50229f16
-      size: 5149
+      md5: d94cf345dcce093909384f33c61601ba
+      size: 4909
     - path: src/rag/embeddings.py
       hash: md5
       md5: 474ce290b7a27979a96449ca45f5c28b
@@ -199,16 +199,20 @@ stages:
       size: 114555
     - path: quality_gates.yaml
       hash: md5
-      md5: dad7066701b5e963dd3fd8636eedfcdf
-      size: 2038
+      md5: 40f154bd9b443849a76b7421d19ca6bf
+      size: 4752
+    - path: reports/generation_metrics.json
+      hash: md5
+      md5: ff0a2efad60bc3081f6e9c3ac7683d8d
+      size: 2207
     - path: reports/retrieval_metrics.json
       hash: md5
       md5: bf9c2bee084f36f0656fd0c929340996
       size: 1681
     - path: src/quality/gates.py
       hash: md5
-      md5: 4ef41c33c06b062199f603efc1cd492e
-      size: 8856
+      md5: 3216a84b57c48053d00aa0f44c4a6a96
+      size: 10924
     params:
       params.yaml:
         chunking:
@@ -221,5 +225,62 @@ stages:
     outs:
     - path: reports/quality_gates.json
       hash: md5
-      md5: a4058b07f4d4dc114b29bcbc4dbe83bd
-      size: 4676
+      md5: 3b217438fe02319b20c70f8282d3310d
+      size: 8430
+  evaluate_generation:
+    cmd: python -m src.evaluation.generation
+    deps:
+    - path: artifacts/index
+      hash: md5
+      md5: 3cc0164857b806d866c58ab2b7de8ce9.dir
+      size: 350209
+      nfiles: 3
+    - path: data/eval/generation_questions.jsonl
+      hash: md5
+      md5: 7de85ac84d357f443eef08223ea8b891
+      size: 6647
+    - path: src/evaluation/generation.py
+      hash: md5
+      md5: fac615a8f38abf95d926efe93be5c54a
+      size: 14958
+    - path: src/rag/generator.py
+      hash: md5
+      md5: f785f33aa06acdf63156a4e4d4c72982
+      size: 4261
+    - path: src/rag/pipeline.py
+      hash: md5
+      md5: 2d6d1043b9e02d3c80194ba079d1d288
+      size: 6577
+    - path: src/rag/prompt.py
+      hash: md5
+      md5: 7e051039ddd66d9f475315f029878c2d
+      size: 3410
+    - path: src/rag/translation.py
+      hash: md5
+      md5: c88c2eda8a752451ca3cb7899d93b657
+      size: 2621
+    params:
+      params.yaml:
+        generation:
+          temperature: 0.0
+          max_tokens: 1000
+          translation_max_tokens: 300
+          reasoning_effort: low
+          price_per_million_input: 0.1
+          price_per_million_output: 0.5
+        generation_eval:
+          use_judge: true
+          sleep_seconds: 1.0
+        retrieval:
+          top_k: 4
+          min_score: 0.36
+          translate_query: true
+    outs:
+    - path: reports/generation_details.jsonl
+      hash: md5
+      md5: d8d28cdea31cd59e445cee8e5ff1f62c
+      size: 40025
+    - path: reports/generation_metrics.json
+      hash: md5
+      md5: ff0a2efad60bc3081f6e9c3ac7683d8d
+      size: 2207
