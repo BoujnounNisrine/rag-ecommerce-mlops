@@ -17,6 +17,10 @@ venv/
 # MLflow
 mlruns/
 mlartifacts/
+mlflow.db
 
-# Index vectoriel
+# Index vectoriel (suivi par DVC)
 /artifacts/
+
+# Journaux de requêtes (monitoring local)
+/logs/

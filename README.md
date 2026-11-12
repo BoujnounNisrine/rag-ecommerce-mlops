@@ -22,7 +22,7 @@ référence, cite ses sources et refuse les questions hors périmètre.
 Bitext CSV + politiques .md
         │  download → prepare (nettoyage, provenance)
         ▼
-documents.jsonl ──chunk──► chunks.jsonl ──► embeddings + index FAISS unique
+documents.jsonl ──chunk──► chunks.jsonl ──► embeddings + index vectoriel unique
                                                      │
 question ─► retrieval top-k ─► contexte ─► LLM (Groq) ─► réponse + références
 ```
@@ -33,16 +33,28 @@ RAG monolithique, **un seul index vectoriel**, comme demandé par le cahier des 
 
 ```
 ├── params.yaml            # toute la configuration (chunking, seed, chemins…)
-├── dvc.yaml               # pipeline : download → prepare → chunk → make_eval
+├── dvc.yaml               # download → prepare → chunk → make_eval → build_index → evaluate_retrieval
 ├── src/
 │   ├── config.py          # chargement + validation de params.yaml
-│   └── data/
-│       ├── download.py    # étape download
-│       ├── cleaning.py    # remplacement des placeholders {{…}} de Bitext
-│       ├── prepare.py     # étape prepare : corpus + métadonnées de provenance
-│       ├── chunking.py    # découpage en fenêtre glissante
-│       ├── chunk.py       # étape chunk
-│       └── make_eval.py   # étape make_eval : questions annotées
+│   ├── data/
+│   │   ├── download.py    # étape download
+│   │   ├── cleaning.py    # remplacement des placeholders {{…}} de Bitext
+│   │   ├── prepare.py     # étape prepare : corpus + métadonnées de provenance
+│   │   ├── chunking.py    # découpage en fenêtre glissante
+│   │   ├── chunk.py       # étape chunk
+│   │   └── make_eval.py   # étape make_eval : questions annotées
+│   ├── rag/
+│   │   ├── embeddings.py  # sentence-transformers (+ embedder factice pour les tests)
+│   │   ├── index.py       # index vectoriel unique, recherche cosinus exacte
+│   │   ├── build_index.py # étape build_index
+│   │   ├── prompt.py      # prompt avec citations et garde-fous
+│   │   ├── generator.py   # appel à l'API Groq
+│   │   ├── pipeline.py    # retrieval → refus ou génération → réponse + sources
+│   │   ├── monitoring.py  # journal JSONL des requêtes (sans le texte des questions)
+│   │   └── ask.py         # interface en ligne de commande
+│   └── evaluation/
+│       ├── retrieval.py        # Recall@k, MRR, seuil hors périmètre
+│       └── run_experiments.py  # comparaison des configurations + MLflow
 ├── data/
 │   ├── raw/policies/      # documents de politique (Git)
 │   └── eval/out_of_scope.txt
@@ -92,20 +104,57 @@ pytest -q
 La CI GitHub Actions exécute à chaque push : lint, validation de `params.yaml`, tests unitaires,
 et vérification qu'aucun secret n'est versionné.
 
-## Évaluation (prévue)
+## Utiliser l'assistant
 
-- **Recall@k** : un retrieval est réussi si l'un des k chunks retrouvés porte le même `intent`
-  que la question.
-- **Hors périmètre** : taux de refus correct sur `out_of_scope.txt`.
-- **Expériences** : `small_chunks` (120/20) vs `large_chunks` (300/60), suivies dans MLflow.
+```bash
+dvc repro build_index                                   # construit l'index (télécharge le modèle la 1re fois)
+python -m src.rag.ask "How can I return an item?"       # une question
+python -m src.rag.ask                                   # mode interactif
+```
+
+La réponse, en français, cite ses sources (`[1]`, `[2]`…), avec le fichier, le titre et la version.
+Si le meilleur passage a une similarité inférieure à `retrieval.min_score`, l'assistant
+refuse **sans appeler le LLM de réponse**.
+
+**Questions en français** : les documents et le modèle d'embeddings sont en anglais. Avec
+`retrieval.translate_query: true`, la question est traduite en anglais (appel Groq court)
+pour la recherche uniquement ; le LLM reçoit la question originale. En cas d'échec de la
+traduction, la recherche se fait avec la question originale. Un modèle d'embeddings
+multilingue a été testé et rejeté (moins bon en anglais comme en français).
+
+## Évaluation et expériences
+
+```bash
+dvc repro evaluate_retrieval      # ou : python -m src.evaluation.run_experiments
+mlflow ui                         # puis http://127.0.0.1:5000
+```
+
+- **Recall@k / MRR** : un retrieval est réussi si l'un des k chunks porte le même `intent`
+  que la question. Les chunks de politique n'ont pas d'intent, donc Recall@k est une borne basse.
+- **Hors périmètre** : taux de refus sur `out_of_scope.txt` et taux de faux refus sur les
+  questions du périmètre.
+- **Seuil `min_score`** : `suggested_min_score` est le seuil qui maximise l'exactitude
+  équilibrée (accepter le périmètre, refuser le hors périmètre). Il justifie la valeur
+  retenue dans `params.yaml`.
+- **Expériences** : `small_chunks` (120/20) vs `large_chunks` (300/60). Chaque run MLflow
+  enregistre paramètres, métriques, empreintes DVC des données et détail par question.
+
+## Monitoring
+
+Chaque requête ajoute une ligne à `logs/requests.jsonl` : latence (retrieval, génération,
+total), tokens consommés, refus, erreur, meilleur score et sources. Le texte de la question
+n'est pas stocké, seulement une empreinte et sa longueur.
 
 ## Avancement
 
 - [x] Structure du dépôt, configuration, pipeline DVC
 - [x] Ingestion, nettoyage, chunking, jeu d'évaluation
 - [x] Tests unitaires et CI
-- [ ] Embeddings + index FAISS
-- [ ] Pipeline RAG (retrieval + génération Groq + références)
-- [ ] Évaluation + MLflow + quality gates
-- [ ] Monitoring (latence, erreurs, coût)
+- [x] Embeddings + index vectoriel
+- [x] Pipeline RAG (retrieval + génération Groq + références + refus)
+- [x] Évaluation du retrieval + MLflow
+- [x] Journal de monitoring
+- [ ] Évaluation de la génération (fidélité, exactitude)
+- [ ] Quality gates dans la CI
+- [ ] Tableau de bord de monitoring
 - [ ] Rapport de risques et gouvernance

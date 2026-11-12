@@ -23,6 +23,19 @@ def test_invalid_experiment_is_rejected():
         validate(params)
 
 
+@pytest.mark.parametrize(
+    "section,key,value",
+    [("retrieval", "top_k", 0), ("retrieval", "min_score", 1.5),
+     ("generation", "temperature", -0.1), ("generation", "max_tokens", 0),
+     ("generation", "reasoning_effort", "turbo")],
+)
+def test_invalid_rag_settings_are_rejected(section, key, value):
+    params = copy.deepcopy(load_params())
+    params[section][key] = value
+    with pytest.raises(ConfigError):
+        validate(params)
+
+
 def test_missing_section_is_rejected():
     params = copy.deepcopy(load_params())
     del params["chunking"]

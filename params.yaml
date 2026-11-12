@@ -11,6 +11,9 @@ data:
   chunks: data/processed/chunks.jsonl
   eval_questions: data/eval/questions.jsonl
   out_of_scope: data/eval/out_of_scope.txt
+  index_dir: artifacts/index
+  retrieval_report: reports/retrieval_metrics.json
+  request_log: logs/requests.jsonl
 
 prepare:
   # Nombre de réponses distinctes conservées par intent pour construire le corpus.
@@ -19,10 +22,10 @@ prepare:
   min_response_words: 20
 
 chunking:
-  # Configuration active. Les deux configurations comparées dans MLflow
-  # sont listées dans `experiments` ci-dessous.
-  chunk_size: 200      # en mots
-  chunk_overlap: 40    # en mots
+  # Configuration active = large_chunks, meilleure dans la comparaison MLflow
+  # (Recall@1 0.824 vs 0.796, MRR 0.886 vs 0.864, 146 chunks vs 189).
+  chunk_size: 300      # en mots
+  chunk_overlap: 60    # en mots
 
 experiments:
   - name: small_chunks
@@ -32,6 +35,37 @@ experiments:
     chunk_size: 300
     chunk_overlap: 60
 
+embeddings:
+  # Petit modèle anglais (~90 Mo), rapide sur CPU, vecteurs de dimension 384.
+  # Testé : paraphrase-multilingual-MiniLM-L12-v2 -> moins bon partout
+  # (Recall@1 0.787 vs 0.824, hors périmètre refusé 80 % vs 90 %) et échec sur
+  # les questions françaises. On garde le modèle anglais + traduction de la requête.
+  model: sentence-transformers/all-MiniLM-L6-v2
+  batch_size: 32
+
+retrieval:
+  top_k: 4
+  # Seuil de refus hors périmètre. Le seuil suggéré pour large_chunks est 0.3645
+  # (exactitude équilibrée = 1.0 sur 108 questions du périmètre et 10 hors périmètre).
+  # Arrondi à 0.36 pour ne refuser aucune question légitime. Marge faible :
+  # à recalibrer avec plus de questions hors périmètre.
+  min_score: 0.36
+  # Traduit la question en anglais (appel Groq court) avant la recherche, pour
+  # pouvoir poser des questions en français sur des documents en anglais.
+  translate_query: true
+
+generation:
+  # Le nom du modèle Groq est lu dans .env (GROQ_MODEL) pour pouvoir en changer
+  # sans modifier le code. Température 0 = réponses reproductibles.
+  # 1000 tokens : gpt-oss raisonne avant de répondre, son raisonnement consomme des tokens.
+  temperature: 0.0
+  max_tokens: 1000
+  translation_max_tokens: 300
+  # "low" pour les modèles qui raisonnent (gpt-oss) : plus rapide, moins de tokens.
+  # Mettre null si GROQ_MODEL désigne un modèle qui ne raisonne pas.
+  reasoning_effort: low
+
 eval:
   # Questions tirées de la colonne `instruction`, stratifiées par intent.
   questions_per_intent: 4
+  ks: [1, 3, 5]

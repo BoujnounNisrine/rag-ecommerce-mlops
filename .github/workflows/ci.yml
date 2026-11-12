@@ -18,7 +18,7 @@ jobs:
 
       # Seules les dépendances nécessaires aux tests : CI rapide.
       - name: Install dependencies
-        run: pip install pandas pyyaml pytest ruff
+        run: pip install pandas numpy pyyaml python-dotenv pytest ruff
 
       - name: Lint (quality gate code)
         run: ruff check .

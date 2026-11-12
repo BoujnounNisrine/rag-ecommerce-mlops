@@ -41,3 +41,34 @@ stages:
       - eval
     outs:
       - data/eval/questions.jsonl
+
+  build_index:
+    cmd: python -m src.rag.build_index
+    deps:
+      - src/rag/build_index.py
+      - src/rag/embeddings.py
+      - src/rag/index.py
+      - data/processed/chunks.jsonl
+    params:
+      - embeddings
+    outs:
+      - artifacts/index
+
+  evaluate_retrieval:
+    cmd: python -m src.evaluation.run_experiments
+    deps:
+      - src/evaluation/run_experiments.py
+      - src/evaluation/retrieval.py
+      - src/data/chunking.py
+      - src/rag/embeddings.py
+      - src/rag/index.py
+      - data/processed/documents.jsonl
+      - data/eval/questions.jsonl
+    params:
+      - experiments
+      - embeddings
+      - retrieval
+      - eval.ks
+    metrics:
+      - reports/retrieval_metrics.json:
+          cache: false
