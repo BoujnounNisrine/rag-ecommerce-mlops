@@ -139,6 +139,27 @@ mlflow ui                         # puis http://127.0.0.1:5000
 - **Expériences** : `small_chunks` (120/20) vs `large_chunks` (300/60). Chaque run MLflow
   enregistre paramètres, métriques, empreintes DVC des données et détail par question.
 
+## Quality gates
+
+Une version est **rejetée** si un seul critère de `quality_gates.yaml` échoue. Chaque seuil
+y est justifié à partir de la baseline mesurée.
+
+| Famille | Contrôles | Où |
+|---|---|---|
+| Code | lint (ruff), tests unitaires, validation de `params.yaml` | CI |
+| Sécurité | aucun `.env` ni clé API versionnés | CI |
+| Fraîcheur | le rapport d'évaluation correspond à `params.yaml` et au vrai modèle | CI + DVC |
+| Retrieval | Recall@1, Recall@3, MRR, faux refus, refus hors périmètre, taille du jeu d'évaluation | CI + DVC |
+| Données | doublons, schéma, versions des politiques, placeholders, provenance des chunks, taille des chunks, intents évalués présents dans le corpus | DVC |
+
+```bash
+python -m src.quality.gates                 # tous les contrôles (dernière étape de dvc repro)
+python -m src.quality.gates --report-only   # contrôles exécutés par la CI
+```
+
+Conséquence : après toute modification de `params.yaml`, il faut relancer `dvc repro` et
+committer le nouveau `reports/retrieval_metrics.json`, sinon la CI échoue.
+
 ## Monitoring
 
 Chaque requête ajoute une ligne à `logs/requests.jsonl` : latence (retrieval, génération,
@@ -155,6 +176,6 @@ n'est pas stocké, seulement une empreinte et sa longueur.
 - [x] Évaluation du retrieval + MLflow
 - [x] Journal de monitoring
 - [ ] Évaluation de la génération (fidélité, exactitude)
-- [ ] Quality gates dans la CI
+- [x] Quality gates (CI + DVC)
 - [ ] Tableau de bord de monitoring
 - [ ] Rapport de risques et gouvernance

@@ -50,6 +50,22 @@ def validate(params: dict) -> None:
             raise ConfigError("generation.reasoning_effort doit être null, low, medium ou high")
 
 
+def active_signature(params: dict) -> dict:
+    """Paramètres qui déterminent les métriques de la configuration active.
+
+    Enregistrée dans le rapport d'évaluation, puis comparée par les quality gates
+    aux paramètres actuels : si elles diffèrent, le rapport est obsolète.
+    """
+    return {
+        "chunk_size": params["chunking"]["chunk_size"],
+        "chunk_overlap": params["chunking"]["chunk_overlap"],
+        "embedding_model": params["embeddings"]["model"],
+        "min_score": params["retrieval"]["min_score"],
+        "responses_per_intent": params["prepare"]["responses_per_intent"],
+        "questions_per_intent": params["eval"]["questions_per_intent"],
+    }
+
+
 def load_params(path: Path = PARAMS_PATH) -> dict:
     with open(path, encoding="utf-8") as f:
         params = yaml.safe_load(f)

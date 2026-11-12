@@ -72,8 +72,8 @@ stages:
     deps:
     - path: data/eval/out_of_scope.txt
       hash: md5
-      md5: ca090a0c2d380b43ca862541da888566
-      size: 556
+      md5: cc5cc87283755bb4c4ae87bb099fbe74
+      size: 1719
     - path: data/raw/bitext.csv
       hash: md5
       md5: ffbbbde8a9481dfc8943f264b8b9c9e6
@@ -94,8 +94,8 @@ stages:
     outs:
     - path: data/eval/questions.jsonl
       hash: md5
-      md5: 47fa335dbd0e5097288e30b89b9d8c95
-      size: 22335
+      md5: 8745e3c121eadb3317d44edd5058bcd2
+      size: 25050
   build_index:
     cmd: python -m src.rag.build_index
     deps:
@@ -131,8 +131,8 @@ stages:
     deps:
     - path: data/eval/questions.jsonl
       hash: md5
-      md5: 47fa335dbd0e5097288e30b89b9d8c95
-      size: 22335
+      md5: 8745e3c121eadb3317d44edd5058bcd2
+      size: 25050
     - path: data/processed/documents.jsonl
       hash: md5
       md5: a9a66e1a1c10f6bde96da07f587b9315
@@ -147,8 +147,8 @@ stages:
       size: 4347
     - path: src/evaluation/run_experiments.py
       hash: md5
-      md5: 9acb3c9cc7c24ba89fb9df287674cc61
-      size: 4491
+      md5: 8a07f53098d8ae098b2cadfe50229f16
+      size: 5149
     - path: src/rag/embeddings.py
       hash: md5
       md5: 474ce290b7a27979a96449ca45f5c28b
@@ -180,5 +180,46 @@ stages:
     outs:
     - path: reports/retrieval_metrics.json
       hash: md5
-      md5: 947219209212c91a5608cb31c1754cf1
-      size: 882
+      md5: bf9c2bee084f36f0656fd0c929340996
+      size: 1681
+  quality_gates:
+    cmd: python -m src.quality.gates
+    deps:
+    - path: data/eval/questions.jsonl
+      hash: md5
+      md5: 8745e3c121eadb3317d44edd5058bcd2
+      size: 25050
+    - path: data/processed/chunks.jsonl
+      hash: md5
+      md5: d2ae51a00a63e18a98f7d3a8081ac8de
+      size: 125678
+    - path: data/processed/documents.jsonl
+      hash: md5
+      md5: a9a66e1a1c10f6bde96da07f587b9315
+      size: 114555
+    - path: quality_gates.yaml
+      hash: md5
+      md5: dad7066701b5e963dd3fd8636eedfcdf
+      size: 2038
+    - path: reports/retrieval_metrics.json
+      hash: md5
+      md5: bf9c2bee084f36f0656fd0c929340996
+      size: 1681
+    - path: src/quality/gates.py
+      hash: md5
+      md5: 4ef41c33c06b062199f603efc1cd492e
+      size: 8856
+    params:
+      params.yaml:
+        chunking:
+          chunk_size: 300
+          chunk_overlap: 60
+        embeddings:
+          model: sentence-transformers/all-MiniLM-L6-v2
+          batch_size: 32
+        retrieval.min_score: 0.36
+    outs:
+    - path: reports/quality_gates.json
+      hash: md5
+      md5: a4058b07f4d4dc114b29bcbc4dbe83bd
+      size: 4676

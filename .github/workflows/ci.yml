@@ -29,6 +29,11 @@ jobs:
       - name: Unit tests
         run: pytest -q
 
+      # Quality gate modèle/RAG : le rapport d'évaluation versionné doit être à jour
+      # avec params.yaml et respecter les seuils de quality_gates.yaml.
+      - name: Quality gates (retrieval)
+        run: python -m src.quality.gates --report-only
+
       - name: Check no secret is committed
         run: |
           if git ls-files | grep -E '(^|/)\.env$'; then

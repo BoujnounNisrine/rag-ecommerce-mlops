@@ -21,7 +21,7 @@ from pathlib import Path
 
 import yaml
 
-from src.config import load_params, resolve
+from src.config import active_signature, load_params, resolve
 from src.data.chunking import chunk_documents
 from src.data.io import read_jsonl, write_jsonl
 from src.evaluation.retrieval import evaluate_retrieval
@@ -82,9 +82,11 @@ def main() -> None:
         mlflow.set_experiment(EXPERIMENT_NAME)
 
     report = {}
+    by_config = {}
     for cfg in params["experiments"]:
         metrics, details = run_one(cfg, docs, questions, embedder, params)
         report[cfg["name"]] = metrics
+        by_config[(cfg["chunk_size"], cfg["chunk_overlap"])] = metrics
 
         if mlflow:
             with mlflow.start_run(run_name=cfg["name"]):
@@ -108,6 +110,19 @@ def main() -> None:
         print(f"\n== {cfg['name']} (size={cfg['chunk_size']}, overlap={cfg['chunk_overlap']}) ==")
         for k, v in metrics.items():
             print(f"  {k:32s} {v}")
+
+    # Configuration active (celle de `chunking`, utilisée par l'assistant) :
+    # c'est elle que les quality gates contrôlent.
+    active = params["chunking"]
+    key = (active["chunk_size"], active["chunk_overlap"])
+    if key not in by_config:
+        by_config[key], _ = run_one(active, docs, questions, embedder, params)
+    report["active"] = {
+        "config": active_signature(params),
+        "embedder_used": embedder.name,
+        "metrics": by_config[key],
+    }
+    print(f"\nConfiguration active : size={key[0]}, overlap={key[1]}")
 
     out = resolve(d["retrieval_report"])
     out.parent.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,48 @@
+# Quality gates : critères d'acceptation d'une version de l'assistant.
+#
+# Une version est REJETÉE (dvc repro et CI en échec) si un seul critère échoue.
+#
+# Origine des seuils : baseline mesurée le 2026-11-12 sur la configuration active
+# (all-MiniLM-L6-v2, chunks 300/60, 108 questions du périmètre) :
+#   Recall@1 0.824 | Recall@3 0.944 | Recall@5 0.972 | MRR 0.886 | faux refus 0 %
+# Chaque seuil = baseline moins une tolérance, pour accepter de petites variations
+# sans laisser passer une vraie dégradation. 1 question sur 108 ≈ 0.009.
+
+retrieval:
+  recall_at_3:
+    min: 0.90
+    why: >-
+      Le LLM reçoit les 4 meilleurs passages : la bonne information doit être dans
+      le top 3 pour au moins 9 questions sur 10. Baseline 0.944, tolérance ~5 questions.
+  recall_at_1:
+    min: 0.75
+    why: >-
+      Le premier passage est le plus influent dans la réponse. Baseline 0.824,
+      tolérance ~8 questions.
+  mrr:
+    min: 0.80
+    why: Rang moyen du premier bon passage. Baseline 0.886, tolérance ~0.09.
+  in_scope_false_refusal_rate:
+    max: 0.02
+    why: >-
+      Refuser une question légitime est l'erreur la plus visible pour le client.
+      Baseline 0 %, au plus 2 questions sur 108.
+  out_scope_refusal_rate:
+    min: 0.80
+    why: >-
+      Le filtre par seuil doit arrêter les questions clairement hors sujet avant
+      tout appel payant au LLM. Le LLM reste une seconde barrière, d'où une exigence
+      non stricte. Baseline 0.90 sur 10 questions ; à recalibrer sur les 30 questions.
+  n_in_scope:
+    min: 100
+    why: Empêche de « passer » les gates en réduisant le jeu d'évaluation.
+  n_out_of_scope:
+    min: 25
+    why: Un taux de refus calculé sur moins de 25 questions n'est pas fiable.
+
+data:
+  # Contrôles de données (section 8 du cahier des charges) : schéma, doublons,
+  # provenance. Ils ne s'exécutent que lorsque les données DVC sont présentes.
+  min_documents: 100
+  min_policy_sections: 5
+  max_chunk_words_tolerance: 0   # aucun chunk ne doit dépasser chunk_size

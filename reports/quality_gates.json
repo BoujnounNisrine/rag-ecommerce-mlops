@@ -1,0 +1,167 @@
+{
+  "passed": true,
+  "n_checks": 20,
+  "n_failed": 0,
+  "checks": [
+    {
+      "family": "freshness",
+      "name": "report_matches_params",
+      "passed": true,
+      "value": null,
+      "threshold": "",
+      "detail": ""
+    },
+    {
+      "family": "freshness",
+      "name": "real_embedder_used",
+      "passed": true,
+      "value": "sentence-transformers/all-MiniLM-L6-v2",
+      "threshold": "== sentence-transformers/all-MiniLM-L6-v2",
+      "detail": ""
+    },
+    {
+      "family": "retrieval",
+      "name": "recall_at_3",
+      "passed": true,
+      "value": 0.9444,
+      "threshold": ">= 0.9",
+      "detail": "Le LLM reçoit les 4 meilleurs passages : la bonne information doit être dans le top 3 pour au moins 9 questions sur 10. Baseline 0.944, tolérance ~5 questions."
+    },
+    {
+      "family": "retrieval",
+      "name": "recall_at_1",
+      "passed": true,
+      "value": 0.8241,
+      "threshold": ">= 0.75",
+      "detail": "Le premier passage est le plus influent dans la réponse. Baseline 0.824, tolérance ~8 questions."
+    },
+    {
+      "family": "retrieval",
+      "name": "mrr",
+      "passed": true,
+      "value": 0.8861,
+      "threshold": ">= 0.8",
+      "detail": "Rang moyen du premier bon passage. Baseline 0.886, tolérance ~0.09."
+    },
+    {
+      "family": "retrieval",
+      "name": "in_scope_false_refusal_rate",
+      "passed": true,
+      "value": 0.0,
+      "threshold": "<= 0.02",
+      "detail": "Refuser une question légitime est l'erreur la plus visible pour le client. Baseline 0 %, au plus 2 questions sur 108."
+    },
+    {
+      "family": "retrieval",
+      "name": "out_scope_refusal_rate",
+      "passed": true,
+      "value": 0.9333,
+      "threshold": ">= 0.8",
+      "detail": "Le filtre par seuil doit arrêter les questions clairement hors sujet avant tout appel payant au LLM. Le LLM reste une seconde barrière, d'où une exigence non stricte. Baseline 0.90 sur 10 questions ; à recalibrer sur les 30 questions."
+    },
+    {
+      "family": "retrieval",
+      "name": "n_in_scope",
+      "passed": true,
+      "value": 108,
+      "threshold": ">= 100",
+      "detail": "Empêche de « passer » les gates en réduisant le jeu d'évaluation."
+    },
+    {
+      "family": "retrieval",
+      "name": "n_out_of_scope",
+      "passed": true,
+      "value": 30,
+      "threshold": ">= 25",
+      "detail": "Un taux de refus calculé sur moins de 25 questions n'est pas fiable."
+    },
+    {
+      "family": "data",
+      "name": "min_documents",
+      "passed": true,
+      "value": 145,
+      "threshold": ">= 100",
+      "detail": ""
+    },
+    {
+      "family": "data",
+      "name": "min_policy_sections",
+      "passed": true,
+      "value": 10,
+      "threshold": ">= 5",
+      "detail": ""
+    },
+    {
+      "family": "data",
+      "name": "unique_doc_ids",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "0 doc_id en double"
+    },
+    {
+      "family": "data",
+      "name": "unique_chunk_ids",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "0 chunk_id en double"
+    },
+    {
+      "family": "data",
+      "name": "unique_question_ids",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "0 qid en double"
+    },
+    {
+      "family": "data",
+      "name": "documents_schema",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "Documents sans source, type ou texte : []"
+    },
+    {
+      "family": "data",
+      "name": "policies_have_version",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "Une politique sans version empêche de résoudre les contradictions"
+    },
+    {
+      "family": "data",
+      "name": "no_placeholders",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "Placeholders {{…}} restants : []"
+    },
+    {
+      "family": "data",
+      "name": "chunk_provenance",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "Chunks sans document d'origine : []"
+    },
+    {
+      "family": "data",
+      "name": "chunk_size_respected",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "Chunks de plus de 300 mots : []"
+    },
+    {
+      "family": "data",
+      "name": "eval_intents_in_corpus",
+      "passed": true,
+      "value": 0,
+      "threshold": "== 0",
+      "detail": "Intents évalués absents du corpus : []"
+    }
+  ]
+}
