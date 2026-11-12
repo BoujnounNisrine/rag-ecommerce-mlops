@@ -1,0 +1,43 @@
+stages:
+  download:
+    cmd: python -m src.data.download
+    params:
+      - data.bitext_url
+    outs:
+      - data/raw/bitext.csv
+
+  prepare:
+    cmd: python -m src.data.prepare
+    deps:
+      - src/data/prepare.py
+      - src/data/cleaning.py
+      - data/raw/bitext.csv
+      - data/raw/policies
+    params:
+      - seed
+      - prepare
+    outs:
+      - data/processed/documents.jsonl
+
+  chunk:
+    cmd: python -m src.data.chunk
+    deps:
+      - src/data/chunk.py
+      - src/data/chunking.py
+      - data/processed/documents.jsonl
+    params:
+      - chunking
+    outs:
+      - data/processed/chunks.jsonl
+
+  make_eval:
+    cmd: python -m src.data.make_eval
+    deps:
+      - src/data/make_eval.py
+      - data/raw/bitext.csv
+      - data/eval/out_of_scope.txt
+    params:
+      - seed
+      - eval
+    outs:
+      - data/eval/questions.jsonl

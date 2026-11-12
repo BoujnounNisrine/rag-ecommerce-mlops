@@ -1,0 +1,94 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: python -m src.data.download
+    params:
+      params.yaml:
+        data.bitext_url: 
+          https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset/resolve/main/Bitext_Sample_Customer_Support_Training_Dataset_27K_responses-v11.csv
+    outs:
+    - path: data/raw/bitext.csv
+      hash: md5
+      md5: ffbbbde8a9481dfc8943f264b8b9c9e6
+      size: 19202474
+  prepare:
+    cmd: python -m src.data.prepare
+    deps:
+    - path: data/raw/bitext.csv
+      hash: md5
+      md5: ffbbbde8a9481dfc8943f264b8b9c9e6
+      size: 19202474
+    - path: data/raw/policies
+      hash: md5
+      md5: b4a7ae311daabac121cb10e4a41cced7.dir
+      size: 2063
+      nfiles: 3
+    - path: src/data/cleaning.py
+      hash: md5
+      md5: 963de50dd3a23febbae5b77a84b49a78
+      size: 1662
+    - path: src/data/prepare.py
+      hash: md5
+      md5: a01beed20eb1e77ef62495ea3b786b41
+      size: 3571
+    params:
+      params.yaml:
+        prepare:
+          responses_per_intent: 5
+          min_response_words: 20
+        seed: 42
+    outs:
+    - path: data/processed/documents.jsonl
+      hash: md5
+      md5: a9a66e1a1c10f6bde96da07f587b9315
+      size: 114555
+  chunk:
+    cmd: python -m src.data.chunk
+    deps:
+    - path: data/processed/documents.jsonl
+      hash: md5
+      md5: a9a66e1a1c10f6bde96da07f587b9315
+      size: 114555
+    - path: src/data/chunk.py
+      hash: md5
+      md5: 7a576430498c812a92cb90f0afd2cc1f
+      size: 698
+    - path: src/data/chunking.py
+      hash: md5
+      md5: 1d710d0074af437218a5ac57940faa81
+      size: 1329
+    params:
+      params.yaml:
+        chunking:
+          chunk_size: 200
+          chunk_overlap: 40
+    outs:
+    - path: data/processed/chunks.jsonl
+      hash: md5
+      md5: 2dc3367e1b647eb4fe244b8194fc4c6b
+      size: 129075
+  make_eval:
+    cmd: python -m src.data.make_eval
+    deps:
+    - path: data/eval/out_of_scope.txt
+      hash: md5
+      md5: ca090a0c2d380b43ca862541da888566
+      size: 556
+    - path: data/raw/bitext.csv
+      hash: md5
+      md5: ffbbbde8a9481dfc8943f264b8b9c9e6
+      size: 19202474
+    - path: src/data/make_eval.py
+      hash: md5
+      md5: 4c133f11d1c2f48c4a7f86898c0582dc
+      size: 2427
+    params:
+      params.yaml:
+        eval:
+          questions_per_intent: 4
+        seed: 42
+    outs:
+    - path: data/eval/questions.jsonl
+      hash: md5
+      md5: 47fa335dbd0e5097288e30b89b9d8c95
+      size: 22335

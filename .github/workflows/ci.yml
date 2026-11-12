@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      # Seules les dépendances nécessaires aux tests : CI rapide.
+      - name: Install dependencies
+        run: pip install pandas pyyaml pytest ruff
+
+      - name: Lint (quality gate code)
+        run: ruff check .
+
+      - name: Validate configuration
+        run: python -c "from src.config import load_params; load_params(); print('params.yaml OK')"
+
+      - name: Unit tests
+        run: pytest -q
+
+      - name: Check no secret is committed
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$'; then
+            echo "Un fichier .env est versionné !" && exit 1
+          fi
+          if git grep -nE 'gsk_[A-Za-z0-9]{20,}' -- ':!*.md'; then
+            echo "Une clé Groq semble présente dans le code !" && exit 1
+          fi
+          echo "Aucun secret détecté"

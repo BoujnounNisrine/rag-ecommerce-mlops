@@ -1,0 +1,37 @@
+# Configuration centrale du projet — versionnée avec Git, suivie par DVC.
+# Toute modification ici invalide les étapes DVC concernées.
+
+seed: 42
+
+data:
+  bitext_url: "https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-chatbot-training-dataset/resolve/main/Bitext_Sample_Customer_Support_Training_Dataset_27K_responses-v11.csv"
+  raw_bitext: data/raw/bitext.csv
+  policies_dir: data/raw/policies
+  documents: data/processed/documents.jsonl
+  chunks: data/processed/chunks.jsonl
+  eval_questions: data/eval/questions.jsonl
+  out_of_scope: data/eval/out_of_scope.txt
+
+prepare:
+  # Nombre de réponses distinctes conservées par intent pour construire le corpus.
+  # Bitext contient ~1000 réponses par intent, très redondantes : 5 suffisent.
+  responses_per_intent: 5
+  min_response_words: 20
+
+chunking:
+  # Configuration active. Les deux configurations comparées dans MLflow
+  # sont listées dans `experiments` ci-dessous.
+  chunk_size: 200      # en mots
+  chunk_overlap: 40    # en mots
+
+experiments:
+  - name: small_chunks
+    chunk_size: 120
+    chunk_overlap: 20
+  - name: large_chunks
+    chunk_size: 300
+    chunk_overlap: 60
+
+eval:
+  # Questions tirées de la colonne `instruction`, stratifiées par intent.
+  questions_per_intent: 4

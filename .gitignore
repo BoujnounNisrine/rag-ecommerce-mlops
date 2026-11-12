@@ -1,0 +1,22 @@
+# Données suivies par DVC (pas par Git)
+/data/raw/bitext.csv
+/data/processed/
+/data/eval/questions.jsonl
+
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Index vectoriel
+/artifacts/

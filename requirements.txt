@@ -1,0 +1,17 @@
+# Pipeline de données
+pandas>=2.0
+pyyaml>=6.0
+
+# Versionnement et suivi
+dvc>=3.0
+mlflow>=2.10
+
+# RAG (utilisés aux étapes suivantes)
+sentence-transformers>=2.6
+faiss-cpu>=1.7
+groq>=0.9
+python-dotenv>=1.0
+
+# Qualité
+pytest>=8.0
+ruff>=0.4
