@@ -62,6 +62,11 @@ RAG monolithique, **un seul index vectoriel**, comme demandé par le cahier des 
 └── .github/workflows/ci.yml
 ```
 
+## Résultats
+
+Métriques, comparaisons d'expériences (graphiques), analyse des erreurs et justification
+des 31 quality gates : voir **[EVALUATION.md](EVALUATION.md)**.
+
 ## Reproductibilité
 
 Versions exactes, empreintes des données, commandes de reconstruction et résultats
