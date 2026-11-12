@@ -1,0 +1,10 @@
+# Le surveillant de fichiers de Streamlit inspecte les modules importés, dont PyTorch,
+# ce qui provoque des erreurs parasites au démarrage : on le désactive.
+[server]
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+primaryColor = "#2a78d6"

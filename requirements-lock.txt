@@ -1,0 +1,30 @@
+# Versions exactes utilisées pour produire les résultats du 2026-11-12
+# (Python 3.13.2, Windows, environnement virtuel .venv).
+#
+# Installation reproductible :
+#   pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements-lock.txt
+#
+# requirements.txt garde des bornes minimales (>=) pour le développement ;
+# ce fichier fige les versions pour reconstruire les résultats à l'identique.
+
+# Pipeline de données
+pandas==3.1.1
+PyYAML==6.0.3
+
+# Versionnement et suivi
+dvc==3.67.1
+mlflow==3.18.0
+
+# RAG
+numpy==2.5.4
+sentence-transformers==6.3.0
+groq==1.7.0
+python-dotenv==1.2.4
+
+# Interface
+streamlit==1.67.0
+
+# Qualité
+pytest==9.2.0
+ruff==0.17.4

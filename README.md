@@ -62,6 +62,11 @@ RAG monolithique, **un seul index vectoriel**, comme demandé par le cahier des 
 └── .github/workflows/ci.yml
 ```
 
+## Reproductibilité
+
+Versions exactes, empreintes des données, commandes de reconstruction et résultats
+attendus : voir **[REPRODUCIBILITY.md](REPRODUCIBILITY.md)** et `requirements-lock.txt`.
+
 ## Installation
 
 ```bash
@@ -111,6 +116,16 @@ dvc repro build_index                                   # construit l'index (té
 python -m src.rag.ask "How can I return an item?"       # une question
 python -m src.rag.ask                                   # mode interactif
 ```
+
+**Interface de chat (Streamlit)** :
+
+```bash
+streamlit run src/app/streamlit_app.py      # puis http://localhost:8501
+```
+
+Même pipeline que la ligne de commande ; questions d'exemple dans la barre latérale,
+sources et temps de réponse sous chaque réponse. Les questions posées sont journalisées
+(sans leur texte) et apparaissent dans le tableau de bord de monitoring.
 
 La réponse, en français, cite ses sources (`[1]`, `[2]`…), avec le fichier, le titre et la version.
 Si le meilleur passage a une similarité inférieure à `retrieval.min_score`, l'assistant
