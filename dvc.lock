@@ -203,8 +203,8 @@ stages:
       size: 4752
     - path: reports/generation_metrics.json
       hash: md5
-      md5: ff0a2efad60bc3081f6e9c3ac7683d8d
-      size: 2207
+      md5: efdeac2c8271e43d367caa67964df0e2
+      size: 2203
     - path: reports/retrieval_metrics.json
       hash: md5
       md5: bf9c2bee084f36f0656fd0c929340996
@@ -225,7 +225,7 @@ stages:
     outs:
     - path: reports/quality_gates.json
       hash: md5
-      md5: 3b217438fe02319b20c70f8282d3310d
+      md5: 7643c00ff521ce933944d7c10e8ce936
       size: 8430
   evaluate_generation:
     cmd: python -m src.evaluation.generation
@@ -266,8 +266,8 @@ stages:
           max_tokens: 1000
           translation_max_tokens: 300
           reasoning_effort: low
-          price_per_million_input: 0.1
-          price_per_million_output: 0.5
+          price_per_million_input: 0.075
+          price_per_million_output: 0.3
         generation_eval:
           use_judge: true
           sleep_seconds: 1.0
@@ -278,9 +278,9 @@ stages:
     outs:
     - path: reports/generation_details.jsonl
       hash: md5
-      md5: d8d28cdea31cd59e445cee8e5ff1f62c
-      size: 40025
+      md5: a8fb53e1551c319d9cf56224d67b0f90
+      size: 39766
     - path: reports/generation_metrics.json
       hash: md5
-      md5: ff0a2efad60bc3081f6e9c3ac7683d8d
-      size: 2207
+      md5: efdeac2c8271e43d367caa67964df0e2
+      size: 2203

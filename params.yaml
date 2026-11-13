@@ -68,9 +68,9 @@ generation:
   # Mettre null si GROQ_MODEL désigne un modèle qui ne raisonne pas.
   reasoning_effort: low
   # Prix en USD par million de tokens, pour estimer le coût par requête.
-  # Valeurs à vérifier sur la page de tarifs Groq pour le modèle de GROQ_MODEL.
-  price_per_million_input: 0.10
-  price_per_million_output: 0.50
+  # Tarifs Groq de openai/gpt-oss-20b, relevés le 2026-11-13 (à revoir si GROQ_MODEL change).
+  price_per_million_input: 0.075
+  price_per_million_output: 0.30
 
 generation_eval:
   # LLM juge : vérifie que chaque affirmation de la réponse est appuyée par les

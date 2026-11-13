@@ -12,7 +12,7 @@ de service P95 de 3,7 s. Chiffres du 2026-11-12 ; reconstruction dans [REPRODUCI
 | Fidélité et références | Fidélité (LLM juge) / citations valides | 94,7 % / 100 % |
 | Robustesse | Questions pièges refusées / contenu interdit | 100 % / 0 % |
 | Performance | Latence de service P50 / P95 | 1,1 s / 3,7 s |
-| Coût | Coût estimé pour 1000 questions | 0,13 $ (~940 tokens par requête) |
+| Coût | Coût estimé pour 1000 questions | 0,09 $ (~940 tokens par requête) |
 
 ---
 
@@ -113,10 +113,11 @@ ni les placeholders. L'assouplissement du refus n'a laissé passer **aucune** qu
 
 ### Coût
 
-Environ **943 tokens par requête** (traduction et réponse ; le juge n'est pas compté), soit un coût
-estimé de **0,000129 $ par question** et **0,13 $ pour 1000 questions**, aux tarifs de
-`params.yaml` (0,10 $ / 0,50 $ par million de tokens en entrée / sortie, à vérifier sur la page de
-tarifs de Groq). Les questions refusées par le filtre ne coûtent que la traduction.
+Environ **943 tokens par requête** en moyenne (856 en entrée, 87 en sortie ; traduction et
+réponse, le juge n'est pas compté), soit un coût estimé de **0,00009 $ par question** et
+**0,09 $ pour 1000 questions**, aux tarifs Groq de `gpt-oss-20b` relevés le 2026-11-13
+(0,075 $ / 0,30 $ par million de tokens en entrée / sortie, valeurs reprises dans `params.yaml`).
+Les questions refusées par le filtre ne coûtent que la traduction.
 
 ---
 

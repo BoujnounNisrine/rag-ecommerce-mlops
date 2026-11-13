@@ -159,7 +159,7 @@
       "family": "generation",
       "name": "latency_service_p95_ms",
       "passed": true,
-      "value": 3656.4,
+      "value": 2024.3,
       "threshold": "<= 8000",
       "detail": "Exigence métier : 95 % des réponses en moins de 8 s, traduction comprise. Appliquée à la latence de SERVICE (totale moins l'attente imposée par les limites de débit). Mesure du 2026-11-12 : P95 totale 16,0 s mais P95 service 3,7 s ; 15 requêtes sur 28 ont attendu (114 s au total), à partir de la 7e question, à cause du palier gratuit Groq sollicité par l'évaluation (3 appels par question). La latence totale reste suivie dans le rapport et MLflow ; la limite de débit est un risque de déploiement documenté."
     },
